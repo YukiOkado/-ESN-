@@ -21,7 +21,7 @@ class Reservior_computing_WSmodel:
         self.y_train = self.output()
 
     def input_signal(self):
-        data = np.loadtxt("C:/Users/oo/Documents/santafe.txt")
+        data = np.loadtxt("santafe.txt")
         self.u = data[0:self.Number_Train+self.Number_Test+1]
         return self.u
         
