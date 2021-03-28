@@ -1,7 +1,12 @@
 import numpy as np
+from math import *
+import networkx as nx
 import matplotlib.pyplot as plt
 
-class Reservior_computing:
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Reservior_computing_WSmodel:
     def __init__(self, Number_Nodes, Number_Train,
                  Number_Test, Nonlinearity = 0.9,
                  Input_Sensitivity = 0.1):
@@ -30,13 +35,35 @@ class Reservior_computing:
     def reservior_training(self, Nonlinearity = 0.9, Input_Sensitivity=0.1):
         Jseed = 11
         np.random.seed(int(Jseed))
-        J=np.random.normal(0,np.sqrt(1/self.Number_Nodes),
-                           (self.Number_Nodes,self.Number_Nodes))
+    
+        P = np.random.normal(0,np.sqrt(1/self.Number_Nodes),
+                             (self.Number_Nodes,self.Number_Nodes))
+        
+        G = nx.watts_strogatz_graph(M,20,0.5,seed=10)
+    
+        J=nx.adjacency_matrix(G)
+        J=J.toarray()
+        Q=np.multiply(P,J)
+    
+        lo=np.linalg.eig(Q)
+        la=max(abs(lo[0]))
+        pos=nx.circular_layout(G)
+        nx.draw(G,pos=pos)
+        plt.show()
+        Q=Q/la
+        G_random=nx.watts_strogatz_graph(M,k,1,seed=10)
+        G_lattice=nx.watts_strogatz_graph(M,k,0,seed=10)
+        L_random=nx.average_shortest_path_length(G_random)
+        L=nx.average_shortest_path_length(G)
+        C_lattice=nx.average_clustering(G_lattice)
+        C=nx.average_clustering(G)
+        SMALL_WORLD=(L_random/L)-(C/C_lattice)
+        print(SMALL_WORLD)
         
         x=np.zeros((self.Number_Nodes,1))
         _xmat = x
         for i in range(self.Number_Train+self.Number_Test):
-            x = Nonlinearity * (np.dot(J,x) + Input_Sensitivity * ((self.u[i]-3)/252 * 2 - 1))
+            x = Nonlinearity * (np.dot(Q,x) + Input_Sensitivity * ((self.u[i]-3)/252 * 2 - 1))
             x = np.tanh(x)
 
             _xmat = np.append(_xmat,x,axis=1)
@@ -63,9 +90,19 @@ class Reservior_computing:
         Jseed = 11
         np.random.seed(int(Jseed))
 
-        J = np.random.normal(0,np.sqrt(1/self.Number_Nodes),
+
+        P = np.random.normal(0,np.sqrt(1/self.Number_Nodes),
                              (self.Number_Nodes,self.Number_Nodes))
-        X = Nonlinearity * (np.dot(J,X) 
+       
+        G = nx.watts_strogatz_graph(M,20,0.5,seed=10)
+   
+        J = nx.adjacency_matrix(G)
+        J = J.toarray()
+        Q = np.multiply(P,J)
+        la = np.linalg.eig(Q)
+        lo = max(abs(la[0]))
+        Q=Q/lo
+        X = Nonlinearity * (np.dot(Q,X) 
                             + Input_Sensitivity * ((Y-3)/252 * 2 - 1))
         X       = np.tanh(X)
 
@@ -109,5 +146,6 @@ plt.plot(target2,label ="Target Signal")
 plt.plot(prediction, label ="prerdict")
 plt.legend()
 plt.show()
+
 
 
