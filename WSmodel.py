@@ -133,7 +133,7 @@ class Reservior_computing_WSmodel:
 
         return MAE
    
-esn = Reservior_computing(1000,2000,10)
+esn = Reservior_computing_WSmodel(1000,2000,10)
 esn.input_signal()
 target1, target2 = esn.target_signal()
 esn.reservior_training()
